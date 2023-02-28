@@ -12,6 +12,11 @@ import authRoutes from "./app/routes/auth.js";
 import userRoutes from "./app/routes/users.js";
 import { signup, login, forgotPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
+// enable connection
+import { connect } from "./app/Config/database.js";
+
+connect();
+
 /*Configurations*/
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,9 +52,7 @@ app.use("/users", userRoutes);
 /* Mongoose Setup */
 const PORT = process.env.PORT || 9000;
 mongoose.set('strictQuery', true);
-mongoose.connect(process.env.MONGO_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(()=>{
-    app.listen(PORT, ()=> console.log(`Server is running on Port: ${PORT}`));
-}).catch((error)=> console.log( `${error} did not connect` ));
+// starting the server
+app.listen(PORT, () => {
+    console.log(`SERVER RUNNING 0N ${PORT} `);
+});
