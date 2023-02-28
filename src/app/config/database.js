@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 
 const { MONGO_URI } = process.env;
-
-exports.connect = () => {
+export const connect = () => {
 
     mongoose.set("strictQuery", false);
     mongoose.connect(MONGO_URI, {
