@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const { MONGO_URI } = process.env;
+import { MONGO_URI } from process.env;
 export const connect = () => {
 
     mongoose.set("strictQuery", false);
