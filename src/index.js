@@ -13,7 +13,7 @@ import userRoutes from "./app/routes/users.js";
 import { signup, login, forgotPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
 // enable connection
-import { connect } from "./app/Config/database.js";
+import { connect } from "./app/config/database.js";
 
 connect();
 
