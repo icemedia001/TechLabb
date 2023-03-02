@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import User from "../models/User.js";
+import dotenv from 'dotenv';
+dotenv.config();
 // forgotPassword controller function
 export const forgotPassword = async (req, res) => {
     try {
