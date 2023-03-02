@@ -44,6 +44,7 @@ const upload = multer({ storage });
 app.post("/auth/signup", signup);
 // forgot password route
 app.post("/auth/reset-password", forgotPassword);
+app.get("/auth/reset-password", res.send("Reset password"));
 // login route
 app.post("/auth/login", login);
 /* Routes */
