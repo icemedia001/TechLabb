@@ -7,6 +7,8 @@ import multer from "multer";
 import dotenv from "dotenv";
 import morgan from "morgan";
 import path from "path";
+import passport from 'passport';
+import session from 'express-session';
 import { fileURLToPath } from "url";
 import authRoutes from "./app/routes/auth.js";
 import userRoutes from "./app/routes/users.js";
@@ -62,6 +64,47 @@ app.get("/auth/reset-password", (req, res) => {
     </html>
   `);
 });
+// Set up session middleware
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// Initialize Passport and session middleware
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Set up Passport serialization and deserialization
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
+
+// Set up Google OAuth routes
+app.get(
+  '/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+
+app.get(
+  '/auth/google/callback',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/');
+  }
+);
+
 // login route
 app.post("/auth/login", login);
 /* Routes */
