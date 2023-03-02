@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import User from "../models/User.js";
-/* Register User */
 // forgotPassword controller function
 export const forgotPassword = async (req, res) => {
     try {
@@ -51,6 +50,7 @@ export const forgotPassword = async (req, res) => {
       return res.status(500).json({ message: "Server error" });
     }
   };
+/* Register User */
 export const signup = async (req, res)=>{
     try {
         const {
@@ -75,7 +75,7 @@ res.status(201).json(savedUser);
 export const login = async (req, res)=>{
     try{
         const { email, password } = req.body;
-        const user = await user.findOne({ email: email });
+        const user = await User.findOne({ email: email });
         if (!user) return res.status(400).json({ msg: "User does not exist." });
         const isMatch = await bcrypt.compare(password, user.password);
         if(!isMatch) return res.status(400).json({ msg: "Invalid credentials." });
