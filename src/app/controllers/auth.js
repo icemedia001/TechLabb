@@ -39,7 +39,7 @@ export const forgotPassword = async (req, res) => {
         html: `
           <p>Hello,</p>
           <p>You recently requested to reset your password. Please click on the link below to reset your password:</p>
-          <p><a href="${process.env.CLIENT_URL}/reset-password/${token}">Reset Password</a></p>
+          <p><a href="${process.env.CLIENT_URL}/auth/reset-password/${token}">Reset Password</a></p>
           <p>If you did not make this request, you can ignore this email.</p>
         `,
       };
