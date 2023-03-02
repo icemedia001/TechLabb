@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import User from "../models/User.js";
+import passport from 'passport';
+import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import dotenv from 'dotenv';
 dotenv.config();
 // forgotPassword controller function
@@ -88,3 +90,31 @@ export const login = async (req, res)=>{
         res.status(500).json({ error: err.message });
     }
 };
+//google-oauth
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.CLIENT_ID,
+      clientSecret: process.env.CLIENT_SECRET,
+      callbackURL: '/auth/google/techlabb',
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // Check if user exists
+        let user = await User.findOne({ email: profile.emails[0].value });
+        if (!user) {
+          // If user doesn't exist, create a new user
+          user = new User({
+            username: profile.displayName,
+            email: profile.emails[0].value,
+            password: '', // Since the user is logging in with Google, there's no need for a password
+          });
+          await user.save();
+        }
+        return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    }
+  )
+);
