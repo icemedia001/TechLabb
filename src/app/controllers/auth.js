@@ -5,8 +5,8 @@ import User from "../models/User.js";
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import dotenv from 'dotenv';
-import crypto from crypto;
-import Joi from Joi;
+import crypto from "crypto";
+import Joi from "Joi";
 dotenv.config();
 /* Register User */
 export const signup = async (req, res)=>{
