@@ -34,6 +34,29 @@ app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: store
+  })
+);
+// Initialize Passport and session middleware
+app.use(passport.initialize());
+app.use(passport.session());
+// Set up Passport serialization and deserialization
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (error) {
+    done(error);
+  }
+});
 /*File Storage*/
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
@@ -46,8 +69,6 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 /* Routes With Files*/ 
 app.post("/auth/signup", signup);
-// forgot password route
-app.post("/auth/reset-password", forgotPassword);
 //reset password page
 app.get("/auth/reset-password", (req, res) => {
   res.send(`
@@ -66,6 +87,8 @@ app.get("/auth/reset-password", (req, res) => {
     </html>
   `);
 });
+// forgot password route
+app.post("/auth/reset-password", forgotPassword);
 // Set up session middleware
 const store = new MongoDBStore({
     uri: process.env.MONGO_URI,
@@ -74,33 +97,6 @@ const store = new MongoDBStore({
 store.on("error", (error)=>{
     console.log(error);
 });
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: false,
-    store: store
-  })
-);
-
-// Initialize Passport and session middleware
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Set up Passport serialization and deserialization
-passport.serializeUser((user, done) => {
-  done(null, user.id);
-});
-
-passport.deserializeUser(async (id, done) => {
-  try {
-    const user = await User.findById(id);
-    done(null, user);
-  } catch (error) {
-    done(error);
-  }
-});
-
 // Set up Google OAuth routes
 app.get(
   '/auth/google',
@@ -114,7 +110,6 @@ app.get(
     res.redirect('/books');
   }
 );
-
 // login route
 app.post("/auth/login", login);
 /* Routes */
