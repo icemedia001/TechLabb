@@ -17,7 +17,8 @@ export const forgotPassword = async (req, res) => {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-  
+      const companyEmail = process.env.SMTP_USERNAME;
+      const companyPassword = process.env.SMTP_PASSWORD
       // Generate a password reset token
       const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
         expiresIn: "1h",
@@ -27,14 +28,14 @@ export const forgotPassword = async (req, res) => {
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
-          user: process.env.SMTP_USERNAME,
-          pass: process.env.SMTP_PASSWORD,
+          user: companyEmail,
+          pass: companyPassword,
         },
       });
   
       const mailOptions = {
-        from: process.env.SMTP_SENDER_EMAIL,
-        to: email,
+        from: companyEmail,
+        to: user.email,
         subject: "Password Reset Request",
         html: `
           <p>Hello,</p>
