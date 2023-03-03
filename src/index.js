@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
+const MongoDBStore = require('connect-mongodb-session')(session);
 import helmet from "helmet";
 import multer from "multer";
 import dotenv from "dotenv";
@@ -65,11 +66,19 @@ app.get("/auth/reset-password", (req, res) => {
   `);
 });
 // Set up session middleware
+const store = new MongoDBStore({
+    uri: process.env.MONGO_URI,
+    collection: "mySessions"
+});
+store.on("error", (error)=>{
+    console.log(error);
+});
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    store: store
   })
 );
 
