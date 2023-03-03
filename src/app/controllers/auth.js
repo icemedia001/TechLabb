@@ -123,13 +123,13 @@ export const forgotPassword = async (req, res) => {
       from: companyEmail,
       to: user.email,
       subject: 'Password Reset Request for Your Techlabb Account',
-      text: `Dear ${user.name},
+      text: `Dear ${user.username},
     
     We have received a request to reset your password for your Techlabb account. If you did not request this, please ignore this email.
     
     To reset your password, please follow the steps below:
     
-    1. Click on the following link: <a href="http://${resetUrl}/reset-password/${token}">
+    1. Click on the following link: <a href="http://${resetUrl}/reset-password/${token}">Reset-Password.</a>
     2. Enter your email address associated with your Techlabb account.
     3. Check your email for a verification code and enter it on the password reset page.
     4. Enter a new password and confirm it.
