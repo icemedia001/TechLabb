@@ -34,6 +34,14 @@ app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
 app.use("/assets", express.static(path.join(__dirname, "public/assets")));
+// Set up session middleware
+const store = new MongoDBStore({
+    uri: process.env.MONGO_URI,
+    collection: "mySessions"
+});
+store.on("error", (error)=>{
+    console.log(error);
+});
 app.use(
   session({
     secret: process.env.SESSION_SECRET,
@@ -89,14 +97,6 @@ app.get("/auth/reset-password", (req, res) => {
 });
 // forgot password route
 app.post("/auth/reset-password", forgotPassword);
-// Set up session middleware
-const store = new MongoDBStore({
-    uri: process.env.MONGO_URI,
-    collection: "mySessions"
-});
-store.on("error", (error)=>{
-    console.log(error);
-});
 // Set up Google OAuth routes
 app.get(
   '/auth/google',
