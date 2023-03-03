@@ -145,7 +145,7 @@ export const forgotPassword = async (req, res) => {
 
     await transporter.sendMail(mailOptions);
 
-    res.status(500).json('An email has been sent to the provided email with further instructions.');
+    res.status(200).json('An email has been sent to the provided email with further instructions.');
 
   } catch (err) {
     res.status(500).json(err);
