@@ -7,6 +7,7 @@ const MongoDBStore = MongoDBStoreFactory(session);
 import helmet from "helmet";
 import multer from "multer";
 import dotenv from "dotenv";
+dotenv.config();
 import morgan from "morgan";
 import path from "path";
 import passport from 'passport';
@@ -18,9 +19,7 @@ import { signup, login, forgotPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
 // enable connection
 import { connect } from "./app/config/database.js";
-
 connect();
-
 /*Configurations*/
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -65,6 +64,18 @@ passport.deserializeUser(async (id, done) => {
     done(error);
   }
 });
+// Set up Google OAuth routes
+app.get(
+  '/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
+app.get(
+  '/auth/google/books',
+  passport.authenticate('google', { failureRedirect: '/login' }),
+  (req, res) => {
+    res.redirect('/books');
+  }
+);
 /*File Storage*/
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
@@ -75,8 +86,6 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage });
-/* Routes With Files*/ 
-app.post("/auth/signup", signup);
 //reset password page
 app.get("/auth/reset-password", (req, res) => {
   res.send(`
@@ -95,23 +104,12 @@ app.get("/auth/reset-password", (req, res) => {
     </html>
   `);
 });
-// forgot password route
-app.post("/auth/reset-password", forgotPassword);
-// Set up Google OAuth routes
-app.get(
-  '/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
-
-app.get(
-  '/auth/google/books',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  (req, res) => {
-    res.redirect('/books');
-  }
-);
+/* Routes With Files*/ 
+app.post("/auth/signup", signup);
 // login route
 app.post("/auth/login", login);
+// forgot password route
+app.post("/auth/reset-password", forgotPassword);
 /* Routes */
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
