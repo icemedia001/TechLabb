@@ -87,24 +87,6 @@ const storage = multer.diskStorage({
     }
 });
 const upload = multer({ storage });
-//reset password page
-app.get("/auth/reset-password", (req, res) => {
-  res.send(`
-    <html>
-      <head>
-        <title>Reset Password</title>
-      </head>
-      <body>
-        <h1>Reset Password</h1>
-        <p>Enter your email address to reset your password</p>
-        <form action="/auth/reset-password" method="POST">
-          <input type="email" name="email" required />
-          <button type="submit">Reset Password</button>
-        </form>
-      </body>
-    </html>
-  `);
-});
 /* Routes With Files*/ 
 app.post("/auth/signup", signup);
 // login route

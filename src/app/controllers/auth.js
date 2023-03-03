@@ -111,7 +111,8 @@ export const forgotPassword = async (req, res) => {
     const resetUrl = `https://localhost:4400/reset-password?token=${token}`;
 
     let transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: process.env.SMTP_HOST,
+      port: process.env.SMTP_PASSWORD,
       auth: {
         user: companyEmail,
         pass: companyPassword
