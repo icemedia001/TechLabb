@@ -73,7 +73,7 @@ passport.use(
   )
 );
 //FORGOT PASSWORD
-exports.forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res) => {
 
   // company email
   const companyEmail = process.env.SMTP_USERNAME;
@@ -138,7 +138,7 @@ exports.forgotPassword = async (req, res) => {
 }
 
 // RESET PASSWORD
-exports.resetPassword = async (req, res) => {
+export const resetPassword = async (req, res) => {
 
   try {
     const { token } = req.params;
