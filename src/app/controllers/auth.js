@@ -5,59 +5,9 @@ import User from "../models/User.js";
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import dotenv from 'dotenv';
+import crypto from crypto;
+import Joi from Joi;
 dotenv.config();
-// forgotPassword controller function
-export const forgotPassword = async (req, res) => {
-    try {
-      const { email } = req.body;
-  
-      // Check if user exists
-      const user = await User.findOne({ email });
-  
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      const companyEmail = process.env.SMTP_USERNAME;
-      const companyPassword = process.env.SMTP_PASSWORD
-      // Generate a password reset token
-      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "1h",
-      });
-  
-      // Send password reset email to user
-      const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-          user: companyEmail,
-          pass: companyPassword,
-        },
-      });
-  
-      const mailOptions = {
-        from: companyEmail,
-        to: user.email,
-        subject: "Password Reset Request",
-        html: `
-          <p>Hello,</p>
-          <p>You recently requested to reset your password. Please click on the link below to reset your password:</p>
-          <p><a href="${process.env.CLIENT_URL}/auth/reset-password/${token}">Reset Password</a></p>
-          <p>If you did not make this request, you can ignore this email.</p>
-        `,
-      };
-  
-      await transporter.sendMail(mailOptions, (error, info)=>{
-        if(error){
-          console.log(error);
-        }else{
-          console.log("Email sent:" + info.response);
-        }
-      });
-      return res.json({ message: "Password reset email sent" });
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Server error" });
-    }
-  };
 /* Register User */
 export const signup = async (req, res)=>{
     try {
@@ -122,3 +72,112 @@ passport.use(
     }
   )
 );
+//FORGOT PASSWORD
+exports.forgotPassword = async (req, res) => {
+
+  // company email
+  const companyEmail = process.env.SMTP_USERNAME;
+
+  // company password 
+  const companyPassword = process.env.SMTP_PASSWORD;
+
+  try {
+
+    // Joi validator
+    const userSchema = Joi.object({
+      email: Joi.string().email().required(),
+    })
+
+    // check error
+    const { error, value } = userSchema.validate(req.body, {
+      abortEarly: false,
+    })
+
+    // return error from fields
+    if (error) return res.status(400).json(error.details[0].message);
+
+    //find user
+    const user = await User.findOne({ email: req.body.email });
+
+    !user && res.status(400).json("Invalid email address");
+
+    //generate a unique token
+    const token = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000;
+    await user.save();
+
+
+    const resetUrl = `https://localhost:4400/reset-password?token=${token}`;
+
+    let transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: companyEmail,
+        pass: companyPassword
+      }
+    });
+  
+    let mailOptions = {
+      from: companyEmail,
+      to: user.email,
+      subject: 'Test Email',
+      text: `You are receiving this email because you (or someone else) has requested a password reset for your account.\n\n
+        Please click on the following link, or paste it into your browser to reset your password:\n\n
+        http://${resetUrl}/reset-password/${token}\n\n
+        If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(500).json('An email has been sent to the provided email with further instructions.');
+
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}
+
+// RESET PASSWORD
+exports.resetPassword = async (req, res) => {
+
+  try {
+    const { token } = req.params;
+
+    const userSchema = Joi.object({
+      password: Joi.string().min(6).max(30).required(),
+      confirmpassword: Joi.string().valid(Joi.ref('password')).required(),
+    })
+
+
+    // check error
+    const { error } = userSchema.validate(req.body, {
+      abortEarly: false,
+    })
+
+    // return error from fields
+    if (error) return res.status(400).json(error.details[0].message);
+
+    const { password } = req.body;
+
+    const user = await User.findOne({
+      resetPasswordToken: token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+
+    if (!user) {
+      return res.status(400).json('Invalid or expired token. Please try again.');
+    }
+
+    // Update the user's password and clear the reset token
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.json('Your password has been reset.');
+   
+  } catch (err) {
+    res.status(500).json(err);
+  }
+}

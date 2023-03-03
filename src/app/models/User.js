@@ -1,6 +1,4 @@
 import mongoose from "mongoose";
-// const passportLocalMongoose = require("passport-local-mongoose");
-// const findOrCreate = require("mongoose-findorcreate");
 
 const userSchema = new mongoose.Schema({
   googleId: String,
@@ -23,14 +21,12 @@ const userSchema = new mongoose.Schema({
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
-  createdAt: { type: Date, default: Date.now },
-});
+},
 
-userSchema.methods.generatePasswordResetToken = ()=>{
-  const token = crypto.randomBytes(20).toString("he")
-}
-// userSchema.plugin(findOrCreate);
+  { timestamps: true });
 
-// module.exports = mongoose.model("User", userSchema);
+//userSchema.methods.generatePasswordResetToken = ()=>{
+//  const token = crypto.randomBytes(20).toString("he")
+//}
 const User = mongoose.model("User", userSchema);
 export default User;

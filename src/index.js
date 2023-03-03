@@ -15,7 +15,7 @@ import session from 'express-session';
 import { fileURLToPath } from "url";
 import authRoutes from "./app/routes/auth.js";
 import userRoutes from "./app/routes/users.js";
-import { signup, login, forgotPassword } from "./app/controllers/auth.js";
+import { signup, login, forgotPassword, resetPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
 // enable connection
 import { connect } from "./app/config/database.js";
@@ -109,7 +109,8 @@ app.post("/auth/signup", signup);
 // login route
 app.post("/auth/login", login);
 // forgot password route
-app.post("/auth/reset-password", forgotPassword);
+app.post("/auth/reset-password/:token", resetPassword);
+app.post("/auth/forgot-password", forgotPassword);
 /* Routes */
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
