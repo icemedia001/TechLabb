@@ -3,7 +3,6 @@ import bodyParser from "body-parser";
 import mongoose from "mongoose";
 import cors from "cors";
 import MongoDBStoreFactory from 'connect-mongodb-session';
-import Joi from "joi";
 const MongoDBStore = MongoDBStoreFactory(session);
 import helmet from "helmet";
 import multer from "multer";
