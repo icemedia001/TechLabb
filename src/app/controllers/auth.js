@@ -108,7 +108,7 @@ export const forgotPassword = async (req, res) => {
     await user.save();
 
 
-    const resetUrl = `https://localhost:4400/reset-password?token=${token}`;
+    const resetUrl = process.env.CLIENT_URL;
 
     let transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -122,12 +122,26 @@ export const forgotPassword = async (req, res) => {
     let mailOptions = {
       from: companyEmail,
       to: user.email,
-      subject: 'Test Email',
-      text: `You are receiving this email because you (or someone else) has requested a password reset for your account.\n\n
-        Please click on the following link, or paste it into your browser to reset your password:\n\n
-        http://${resetUrl}/reset-password/${token}\n\n
-        If you did not request this, please ignore this email and your password will remain unchanged.\n`,
+      subject: 'Password Reset Request for Your Techlabb Account',
+      text: `Dear ${user.name},
+    
+    We have received a request to reset your password for your Techlabb account. If you did not request this, please ignore this email.
+    
+    To reset your password, please follow the steps below:
+    
+    1. Click on the following link: <a href="http://${resetUrl}/reset-password/${token}">
+    2. Enter your email address associated with your Techlabb account.
+    3. Check your email for a verification code and enter it on the password reset page.
+    4. Enter a new password and confirm it.
+    5. Click the "Submit" button.
+    
+    If you have any trouble resetting your password or have any questions, please contact our support team at <a href="mailto:teniopemipo@gmail.com">support@techlabb.com</a>.
+.
+    
+    Best regards,
+    The Techlabb Team`
     };
+    
 
     await transporter.sendMail(mailOptions);
 
