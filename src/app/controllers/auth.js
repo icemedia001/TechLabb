@@ -25,9 +25,7 @@ export const forgotPassword = async (req, res) => {
   
       // Send password reset email to user
       const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: process.env.SMTP_PORT,
-        secure: false,
+        service: "gmail",
         auth: {
           user: process.env.SMTP_USERNAME,
           pass: process.env.SMTP_PASSWORD,
