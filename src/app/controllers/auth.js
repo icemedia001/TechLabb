@@ -96,7 +96,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: '/auth/google/techlabb',
+      callbackURL: '/auth/google/books',
     },
     async (accessToken, refreshToken, profile, done) => {
       try {

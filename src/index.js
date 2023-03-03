@@ -108,10 +108,10 @@ app.get(
 );
 
 app.get(
-  '/auth/google/callback',
+  '/auth/google/books',
   passport.authenticate('google', { failureRedirect: '/login' }),
   (req, res) => {
-    res.redirect('/');
+    res.redirect('/books');
   }
 );
 
