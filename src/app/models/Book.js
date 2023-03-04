@@ -30,4 +30,5 @@ filePath: {
   required: true
 }
 });
-module.exports = mongoose.model('Book', bookSchema);
+const Book = mongoose.model('Book', bookSchema);
+export default Book;
