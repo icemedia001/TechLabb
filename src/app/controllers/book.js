@@ -19,7 +19,7 @@ exports.getBookById = async (req, res) => {
   }
 };
 
-exports.addBook = async (req, res) => {
+exports.addNewBook = async (req, res) => {
     const book = new Book({
       title: req.body.title,
       author: req.body.author,
