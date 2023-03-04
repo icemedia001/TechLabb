@@ -12,4 +12,4 @@ router.get('/:id', getBookById);
 // Route to add a new book
 router.post('/', addNewBook);
 
-module.exports = router;
+export default router;
