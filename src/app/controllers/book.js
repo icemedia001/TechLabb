@@ -1,7 +1,6 @@
 // controllers/booksController.js
 
 import Book from "../models/Book.js";
-
 exports.getAllBooks = async (req, res) => {
   try {
     const books = await Book.find();
