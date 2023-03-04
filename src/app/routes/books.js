@@ -1,7 +1,7 @@
 // routes/books.js
 import express from "express"
 const router = express.Router();
-import {getAllBooks, getBookById, addBook} from "../controllers/book.js";
+import { getAllBooks, getBookById, addBook } from "../controllers/book.js";
 
 // Route to get all books
 router.get('/', getAllBooks);
@@ -10,6 +10,6 @@ router.get('/', getAllBooks);
 router.get('/:id', getBookById);
 
 // Route to add a new book
-router.post('/', addNewBook);
+router.post('/', addBook);
 
 module.exports = router;
