@@ -14,6 +14,7 @@ import passport from 'passport';
 import session from 'express-session';
 import { fileURLToPath } from "url";
 import authRoutes from "./app/routes/auth.js";
+import booksRoutes from "./app/routes/books.js";
 import userRoutes from "./app/routes/users.js";
 import { signup, login, forgotPassword, resetPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
@@ -49,6 +50,7 @@ app.use(
     store: store
   })
 );
+app.use('/books', express.static('uploads'));
 // Initialize Passport and session middleware
 app.use(passport.initialize());
 app.use(passport.session());
@@ -79,13 +81,13 @@ app.get(
 /*File Storage*/
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
-        cb(null, "public/assets");
+        cb(null, "./uploads/");
     },
     filename: (req, rile, cb)=>{
-        cb(null, file.originalname);
+        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
     }
 });
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 /* Routes With Files*/ 
 app.post("/auth/signup", signup);
 // login route
@@ -95,7 +97,32 @@ app.post("/auth/reset-password/:token", resetPassword);
 app.post("/auth/forgot-password", forgotPassword);
 /* Routes */
 app.use("/auth", authRoutes);
+app.use("/books", booksRoutes);
 app.use("/users", userRoutes);
+app.post('/upload', upload.single('book'), async (req, res) => {
+  try {
+    // create new book object with data from request
+    const newBook = new Book({
+      title: req.body.title,
+      author: req.body.author,
+      file: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      },
+    });
+
+    // save book to database
+    await newBook.save();
+
+    // return success response
+    res.status(200).json({ message: 'Book uploaded successfully' });
+  } catch (error) {
+    // handle error
+    console.error(error);
+    res.status(500).json({ message: 'Failed to upload book' });
+  }
+});
+
 /* Mongoose Setup */
 const PORT = process.env.PORT || 9000;
 mongoose.set('strictQuery', true);
