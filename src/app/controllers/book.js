@@ -1,7 +1,7 @@
 // controllers/booksController.js
 
 import Book from "../models/Book.js";
-exports.getAllBooks = async (req, res) => {
+export const getAllBooks = async (req, res) => {
   try {
     const books = await Book.find();
     res.json(books);
@@ -10,7 +10,7 @@ exports.getAllBooks = async (req, res) => {
   }
 };
 
-exports.getBookById = async (req, res) => {
+export const getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     res.json(book);
@@ -33,4 +33,3 @@ export const addNewBook = async (req, res) => {
       res.status(400).json({ message: err.message });
     }
   };
-  
