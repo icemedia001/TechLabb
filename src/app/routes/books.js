@@ -1,7 +1,7 @@
 // routes/books.js
 import express from "express"
 const router = express.Router();
-import booksController from "../controllers/books";
+import booksController from "../controllers/book.js";
 
 // Route to get all books
 router.get('/', booksController.getAllBooks);
