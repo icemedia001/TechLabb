@@ -33,3 +33,4 @@ exports.addNewBook = async (req, res) => {
       res.status(400).json({ message: err.message });
     }
   };
+export { addNewBook };
