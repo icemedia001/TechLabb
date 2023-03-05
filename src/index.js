@@ -80,7 +80,7 @@ app.get(
   }
 );
 /*File Storage*/
-const storage = multer.diskStorage({
+const upload = multer.diskStorage({
     destination: function(req, file, cb){
         cb(null, "./uploads/");
     },
@@ -88,7 +88,7 @@ const storage = multer.diskStorage({
         cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
     }
 });
-const upload = multer({ storage: storage });
+const upload = multer({ upload });
 /* Routes With Files*/ 
 app.post("/auth/signup", signup);
 // login route
@@ -98,7 +98,7 @@ app.post("/auth/reset-password/:token", resetPassword);
 app.post("/auth/forgot-password", forgotPassword);
 /* Routes */
 app.use("/auth", authRoutes);
-app.use("/books", booksRoutes);
+app.use("/book", booksRoutes);
 app.use("/users", userRoutes);
 // app.post('/upload', upload.single('book'), async (req, res) => {
 //   try {
@@ -123,7 +123,7 @@ app.use("/users", userRoutes);
 //     res.status(500).json({ message: 'Failed to upload book' });
 //   }
 // });
-app.post("/books/upload", addNewBook);
+app.post("/book/upload", addNewBook);
 /* Mongoose Setup */
 const PORT = process.env.PORT || 9000;
 mongoose.set('strictQuery', true);
