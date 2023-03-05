@@ -10,6 +10,6 @@ router.get('/', getAllBooks);
 router.get('/:id', getBookById);
 
 // Route to add a new book
-router.post('/', addNewBook);
+router.post('/upload', addNewBook);
 
 export default router;

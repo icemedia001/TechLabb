@@ -100,29 +100,29 @@ app.post("/auth/forgot-password", forgotPassword);
 app.use("/auth", authRoutes);
 app.use("/books", booksRoutes);
 app.use("/users", userRoutes);
-app.post('/upload', upload.single('book'), async (req, res) => {
-  try {
-    // create new book object with data from request
-    const newBook = new Book({
-      title: req.body.title,
-      author: req.body.author,
-      file: {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-      },
-    });
+// app.post('/upload', upload.single('book'), async (req, res) => {
+//   try {
+//     // create new book object with data from request
+//     const newBook = new Book({
+//       title: req.body.title,
+//       author: req.body.author,
+//       file: {
+//         data: req.file.buffer,
+//         contentType: req.file.mimetype,
+//       },
+//     });
 
-    // save book to database
-    await newBook.save();
+//     // save book to database
+//     await newBook.save();
 
-    // return success response
-    res.status(200).json({ message: 'Book uploaded successfully' });
-  } catch (error) {
-    // handle error
-    console.error(error);
-    res.status(500).json({ message: 'Failed to upload book' });
-  }
-});
+//     // return success response
+//     res.status(200).json({ message: 'Book uploaded successfully' });
+//   }catch (error) {
+//     // handle error
+//     console.error(error);
+//     res.status(500).json({ message: 'Failed to upload book' });
+//   }
+// });
 app.post("/books/upload", addNewBook);
 /* Mongoose Setup */
 const PORT = process.env.PORT || 9000;
