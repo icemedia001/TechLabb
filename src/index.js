@@ -17,6 +17,7 @@ import authRoutes from "./app/routes/auth.js";
 import booksRoutes from "./app/routes/books.js";
 import userRoutes from "./app/routes/users.js";
 import { signup, login, forgotPassword, resetPassword } from "./app/controllers/auth.js";
+import { getAllBooks, getBookById, addNewBook } from "../controllers/book.js";
 import { verifyToken } from "./app/middleware/auth.js";
 // enable connection
 import { connect } from "./app/config/database.js";
@@ -122,7 +123,7 @@ app.post('/upload', upload.single('book'), async (req, res) => {
     res.status(500).json({ message: 'Failed to upload book' });
   }
 });
-
+app.post("/books/upload", addNewBook);
 /* Mongoose Setup */
 const PORT = process.env.PORT || 9000;
 mongoose.set('strictQuery', true);
