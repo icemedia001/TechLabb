@@ -34,7 +34,6 @@ app.use(morgan("common"));
 app.use(bodyParser.json({ limit: "30mb", extended: true }));
 app.use(bodyParser.urlencoded({ limit: "30mb", extended: true }));
 app.use(cors());
-app.use("/assets", express.static(path.join(__dirname, "public/assets")));
 // Set up session middleware
 const store = new MongoDBStore({
     uri: process.env.MONGO_URI,
@@ -51,7 +50,7 @@ app.use(
     store: store
   })
 );
-app.use('/books', express.static('uploads'));
+app.use('/book', express.static('upload'));
 // Initialize Passport and session middleware
 app.use(passport.initialize());
 app.use(passport.session());
@@ -80,15 +79,16 @@ app.get(
   }
 );
 /*File Storage*/
-const upload = multer.diskStorage({
-    destination: function(req, file, cb){
-        cb(null, "./uploads/");
-    },
-    filename: (req, rile, cb)=>{
-        cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
-    }
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`);
+  }
 });
-const upload = multer({ upload });
+
+const upload = multer({ storage: storage });
 /* Routes With Files*/ 
 app.post("/auth/signup", signup);
 // login route
