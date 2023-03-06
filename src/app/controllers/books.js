@@ -84,7 +84,7 @@ const deleteBook = async (req, res) => {
   }
 };
 
-module.exports = {
+export default {
   createBook,
   getBooks,
   getBookById,
