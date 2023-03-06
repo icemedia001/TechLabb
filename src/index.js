@@ -16,7 +16,6 @@ import authRoutes from "./app/routes/auth.js";
 import userRoutes from "./app/routes/users.js";
 import { signup, login, forgotPassword, resetPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
-import indexRouter from "./app/routes/index.js";
 import bookRouter from "./app/routes/books.js";
 // enable connection
 import { connect } from "./app/config/database.js";
@@ -76,27 +75,6 @@ app.get(
 //Home page
 app.get("/", (req, res)=>{
   res.json({message: "Hello"});
-});
-// SET STORAGE
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads')
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.fieldname + '-' + Date.now())
-  }
-})
-const upload = multer({ storage: storage });
-/* Routes With Files*/ 
-app.post('/upload', upload.single('myFile'), (req, res, next) => {
-  const file = req.file
-  if (!file) {
-    const error = new Error('Please upload a file')
-    error.httpStatusCode = 400
-    return next(error)
-  }
-    res.send(file)
- 
 });
 app.post("/auth/signup", signup);
 // login route

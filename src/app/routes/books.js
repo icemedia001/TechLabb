@@ -1,155 +1,95 @@
 import express from "express";
-const router = express.Router()
+const router = express.Router();
+import multer from "multer";
+import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
-
-// All Books Route
-router.get('/', async (req, res) => {
-  let query = Book.find()
-  if (req.query.title != null && req.query.title != '') {
-    query = query.regex('title', new RegExp(req.query.title, 'i'))
-  }
-  if (req.query.publishedBefore != null && req.query.publishedBefore != '') {
-    query = query.lte('publishDate', req.query.publishedBefore)
-  }
-  if (req.query.publishedAfter != null && req.query.publishedAfter != '') {
-    query = query.gte('publishDate', req.query.publishedAfter)
-  }
-  try {
-    const books = await query.exec()
-    res.render('books/index', {
-      books: books,
-      searchOptions: req.query
-    })
-  } catch {
-    res.redirect('/')
-  }
-})
-
-// New Book Route
-router.get('/new', async (req, res) => {
-  renderNewPage(res, new Book())
-})
-
-// Create Book Route
-router.post('/', async (req, res) => {
-  const book = new Book({
-    title: req.body.title,
-    author: req.body.author,
-    publishDate: new Date(req.body.publishDate),
-    pageCount: req.body.pageCount,
-    description: req.body.description
-  })
-  saveCover(book, req.body.cover)
-
-  try {
-    const newBook = await book.save()
-    res.redirect(`books/${newBook.id}`)
-  } catch {
-    renderNewPage(res, book, true)
-  }
-})
-
-// Show Book Route
-router.get('/:id', async (req, res) => {
-  try {
-    const book = await Book.findById(req.params.id)
-                           .populate('author')
-                           .exec()
-    res.render('books/show', { book: book })
-  } catch {
-    res.redirect('/')
-  }
-})
-
-// Edit Book Route
-router.get('/:id/edit', async (req, res) => {
-  try {
-    const book = await Book.findById(req.params.id)
-    renderEditPage(res, book)
-  } catch {
-    res.redirect('/')
-  }
-})
-
-// Update Book Route
-router.put('/:id', async (req, res) => {
-  let book
-
-  try {
-    book = await Book.findById(req.params.id)
-    book.title = req.body.title
-    book.author = req.body.author
-    book.publishDate = new Date(req.body.publishDate)
-    book.pageCount = req.body.pageCount
-    book.description = req.body.description
-    if (req.body.cover != null && req.body.cover !== '') {
-      saveCover(book, req.body.cover)
+import { authenticateUser } from "../middleware/auth.js";
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.originalname);
     }
-    await book.save()
-    res.redirect(`/books/${book.id}`)
-  } catch {
-    if (book != null) {
-      renderEditPage(res, book, true)
-    } else {
-      redirect('/')
-    }
-  }
-})
+  });
+  
+const upload = multer({ storage });
 
-// Delete Book Page
-router.delete('/:id', async (req, res) => {
-  let book
+// Create a new book
+router.post('/', authenticateUser, upload.single('file'), async (req, res) => {
   try {
-    book = await Book.findById(req.params.id)
-    await book.remove()
-    res.redirect('/books')
-  } catch {
-    if (book != null) {
-      res.render('books/show', {
-        book: book,
-        errorMessage: 'Could not remove book'
-      })
-    } else {
-      res.redirect('/')
-    }
+    const { originalname, path } = req.file;
+    const pdfDoc = await PDFDocument.load(await fs.promises.readFile(path));
+    const title = pdfDoc.getTitle();
+    const author = pdfDoc.getAuthor();
+    const book = new Book({ title, author, file: path });
+    await book.save();
+    return res.status(201).json({ message: 'Book uploaded successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to upload book' });
   }
-})
+});
 
-async function renderNewPage(res, book, hasError = false) {
-  renderFormPage(res, book, 'new', hasError)
-}
-
-async function renderEditPage(res, book, hasError = false) {
-  renderFormPage(res, book, 'edit', hasError)
-}
-
-async function renderFormPage(res, book, form, hasError = false) {
+// Retrieve all books
+router.get('/', authenticateUser, async (req, res) => {
   try {
-    const authors = await Author.find({})
-    const params = {
-      authors: authors,
-      book: book
-    }
-    if (hasError) {
-      if (form === 'edit') {
-        params.errorMessage = 'Error Updating Book'
-      } else {
-        params.errorMessage = 'Error Creating Book'
-      }
-    }
-    res.render(`books/${form}`, params)
-  } catch {
-    res.redirect('/books')
+    const books = await Book.find();
+    return res.status(200).json(books);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to retrieve books' });
   }
-}
+});
 
-function saveCover(book, coverEncoded) {
-  if (coverEncoded == null) return
-  const cover = JSON.parse(coverEncoded)
-  if (cover != null && imageMimeTypes.includes(cover.type)) {
-    book.coverImage = new Buffer.from(cover.data, 'base64')
-    book.coverImageType = cover.type
+// Retrieve a single book by ID
+router.get('/:id', authenticateUser, async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+    return res.status(200).json(book);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to retrieve book' });
   }
-}
+});
 
-module.exports = router
+// Update a book by ID
+router.patch('/:id', authenticateUser, async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+    if (req.body.title) {
+      book.title = req.body.title;
+    }
+    if (req.body.author) {
+      book.author = req.body.author;
+    }
+    await book.save();
+    return res.status(200).json({ message: 'Book updated successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to update book' });
+  }
+});
+
+// Delete a book by ID
+router.delete('/:id', authenticateUser, async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) {
+      return res.status(404).json({ message: 'Book not found' });
+    }
+    await book.remove();
+    return res.status(200).json({ message: 'Book deleted successfully' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Failed to delete book' });
+  }
+});
+
+module.exports = router;
