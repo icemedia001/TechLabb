@@ -16,8 +16,8 @@ import authRoutes from "./app/routes/auth.js";
 import userRoutes from "./app/routes/users.js";
 import { signup, login, forgotPassword, resetPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
-const indexRouter = require('./routes/index');
-const bookRouter = require('./routes/books');
+import indexRouter from "./app/routes/index.js";
+import bookRouter from "./app/routes/books.js";
 // enable connection
 import { connect } from "./app/config/database.js";
 connect();
