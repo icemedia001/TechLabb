@@ -85,7 +85,6 @@ app.post("/auth/forgot-password", forgotPassword);
 /* Routes */
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
-app.use('/', indexRouter);
 app.use('/books', bookRouter);
 /* Mongoose Setup */
 const PORT = process.env.PORT || 9000;
