@@ -4,7 +4,10 @@ import multer from "multer";
 import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
 import { verifyToken } from "../middleware/auth.js";
-import path from "path";
+import { fileURLToPath } from 'url';
+import path from 'path';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const uploadPath = path.join(__dirname, '..', 'uploads');
 
 const storage = multer.diskStorage({
