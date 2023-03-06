@@ -3,7 +3,7 @@ const router = express.Router();
 import multer from "multer";
 import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
-import { authenticateUser } from "../middleware/auth.js";
+import { verifyToken } from "../middleware/auth.js";
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       cb(null, 'uploads/');
@@ -16,7 +16,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Create a new book
-router.post('/', authenticateUser, upload.single('file'), async (req, res) => {
+router.post('/', verifyToken, upload.single('file'), async (req, res) => {
   try {
     const { originalname, path } = req.file;
     const pdfDoc = await PDFDocument.load(await fs.promises.readFile(path));
@@ -32,7 +32,7 @@ router.post('/', authenticateUser, upload.single('file'), async (req, res) => {
 });
 
 // Retrieve all books
-router.get('/', authenticateUser, async (req, res) => {
+router.get('/', verifyToken, async (req, res) => {
   try {
     const books = await Book.find();
     return res.status(200).json(books);
@@ -43,7 +43,7 @@ router.get('/', authenticateUser, async (req, res) => {
 });
 
 // Retrieve a single book by ID
-router.get('/:id', authenticateUser, async (req, res) => {
+router.get('/:id', verifyToken, async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {
@@ -57,7 +57,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
 });
 
 // Update a book by ID
-router.patch('/:id', authenticateUser, async (req, res) => {
+router.patch('/:id', verifyToken, async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {
@@ -78,7 +78,7 @@ router.patch('/:id', authenticateUser, async (req, res) => {
 });
 
 // Delete a book by ID
-router.delete('/:id', authenticateUser, async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {
