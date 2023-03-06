@@ -4,14 +4,20 @@ import multer from "multer";
 import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
 import { verifyToken } from "../middleware/auth.js";
+import path from "path";
+const uploadPath = path.join(__dirname, '..', 'uploads');
+
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-      cb(null, file.originalname);
-    }
-  });
+  destination: function (req, file, cb) {
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const extension = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + extension);
+  }
+});
+
   
 const upload = multer({ storage });
 
