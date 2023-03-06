@@ -4,6 +4,7 @@ import multer from "multer";
 import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
 import { verifyToken } from "../middleware/auth.js";
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
@@ -28,11 +29,9 @@ const upload = multer({ storage });
 router.post('/', upload.single('file'), async (req, res) => {
   try {
     const { originalname, path } = req.file;
-    const pdfDoc = await PDFDocument.load(await fs.promises.readFile(path));
-    const title = pdfDoc.getTitle();
-    const author = pdfDoc.getAuthor();
-    const book = new Book({ title, author, file: path });
-    await book.save();
+    const fileData = await fs.promises.readFile(path); // Read the file contents
+    const book = new Book({ title: req.body.title, author: req.body.author, file: fileData });
+    await book.save(); // Save the book to the database
     return res.status(201).json({ message: 'Book uploaded successfully' });
   } catch (err) {
     console.error(err);
