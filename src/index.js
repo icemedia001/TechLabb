@@ -16,6 +16,8 @@ import authRoutes from "./app/routes/auth.js";
 import userRoutes from "./app/routes/users.js";
 import { signup, login, forgotPassword, resetPassword } from "./app/controllers/auth.js";
 import { verifyToken } from "./app/middleware/auth.js";
+const indexRouter = require('./routes/index');
+const bookRouter = require('./routes/books');
 // enable connection
 import { connect } from "./app/config/database.js";
 connect();
@@ -105,6 +107,8 @@ app.post("/auth/forgot-password", forgotPassword);
 /* Routes */
 app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
+app.use('/', indexRouter);
+app.use('/books', bookRouter);
 /* Mongoose Setup */
 const PORT = process.env.PORT || 9000;
 mongoose.set('strictQuery', true);
