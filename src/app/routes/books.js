@@ -22,7 +22,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Create a new book
-router.post('/', verifyToken, upload.single('file'), async (req, res) => {
+router.post('/', upload.single('file'), async (req, res) => {
   try {
     const { originalname, path } = req.file;
     const pdfDoc = await PDFDocument.load(await fs.promises.readFile(path));
