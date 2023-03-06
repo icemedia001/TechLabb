@@ -4,7 +4,8 @@ import multer from "multer";
 import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
 import { verifyToken } from "../middleware/auth.js";
-import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
+import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import path from 'path';
 const __filename = fileURLToPath(import.meta.url);
@@ -16,9 +17,9 @@ const storage = multer.diskStorage({
     cb(null, uploadPath);
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const uniqueSuffix = uuidv4();
     const extension = path.extname(file.originalname);
-    cb(null, file.fieldname + '-' + uniqueSuffix + extension);
+    cb(null, uniqueSuffix + extension);
   }
 });
 
@@ -28,10 +29,15 @@ const upload = multer({ storage });
 // Create a new book
 router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const { originalname, path } = req.file;
-    const fileData = await fs.promises.readFile(path); // Read the file contents
-    const book = new Book({ title: req.body.title, author: req.body.author, file: fileData });
-    await book.save(); // Save the book to the database
+    const { originalname, filename } = req.file;
+    const filePath = path.join(uploadPath, filename);
+    const pdfDoc = await PDFDocument.load(await fs.readFile(filePath));
+    const title = pdfDoc.getTitle();
+    const author = pdfDoc.getAuthor();
+    const data = await fs.readFile(filePath);
+    const book = new Book({ title, author, file: data });
+    await book.save();
+    await fs.unlink(filePath);
     return res.status(201).json({ message: 'Book uploaded successfully' });
   } catch (err) {
     console.error(err);
@@ -40,7 +46,7 @@ router.post('/', upload.single('file'), async (req, res) => {
 });
 
 // Retrieve all books
-router.get('/', verifyToken, async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const books = await Book.find();
     return res.status(200).json(books);
@@ -49,6 +55,7 @@ router.get('/', verifyToken, async (req, res) => {
     return res.status(500).json({ message: 'Failed to retrieve books' });
   }
 });
+
 
 // Retrieve a single book by ID
 router.get('/:id', verifyToken, async (req, res) => {

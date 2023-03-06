@@ -16,7 +16,8 @@ const bookSchema = new mongoose.Schema({
   author: {
     type: String,
     required: true
-  }
+  },
+  file: Buffer
 });
 
 export default mongoose.model('Book', bookSchema);
