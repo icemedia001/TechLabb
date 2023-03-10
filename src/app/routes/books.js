@@ -29,15 +29,18 @@ const upload = multer({ storage });
 // Create a new book
 router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const { originalname, filename } = req.file;
-    const filePath = path.join(uploadPath, filename);
-    const pdfDoc = await PDFDocument.load(await fs.readFile(filePath));
+    const { originalname } = req.file;
+    const pdfDoc = await PDFDocument.load(req.file.buffer);
     const title = pdfDoc.getTitle();
     const author = pdfDoc.getAuthor();
-    const data = await fs.readFile(filePath);
-    const book = new Book({ title, author, file: data });
+    const book = new Book({ title, author });
+
+    // Save the file to GridFS
+    const writeStream = book.createWriteStream({ filename: originalname });
+    pdfDoc.save().pipe(writeStream);
+
     await book.save();
-    await fs.unlink(filePath);
+
     return res.status(201).json({ message: 'Book uploaded successfully' });
   } catch (err) {
     console.error(err);
