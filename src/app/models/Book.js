@@ -17,7 +17,21 @@ const bookSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  file: Buffer
+  file: {
+    id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'uploads.files' // Collection name for uploaded files in MongoDB
+    },
+    filename: {
+      type: String
+    },
+    contentType: {
+      type: String
+    },
+    size: {
+      type: Number
+    }
+  }
 });
 
 export default mongoose.model('Book', bookSchema);

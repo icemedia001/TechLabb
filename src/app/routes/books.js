@@ -1,6 +1,7 @@
 import express from "express";
 const router = express.Router();
 import multer from "multer";
+import GridFsStorage from "multer-gridfs-storage";
 import { PDFDocument } from "pdf-lib";
 import Book from "../models/Book.js";
 import { verifyToken } from "../middleware/auth.js";
@@ -22,22 +23,26 @@ const storage = multer.diskStorage({
     cb(null, uniqueSuffix + extension);
   }
 });
-
-  
-const upload = multer({ storage });
-
+const upload = multer({ storage: storage });
+// Create a new GridFsStorage instance and pass in the multer options
+const gfsStorage = new GridFsStorage({
+  url: 'mongodb://localhost:27017/mydatabase',
+  options: { useNewUrlParser: true, useUnifiedTopology: true },
+  file: function (req, file) {
+    return {
+      filename: file.originalname,
+      bucketName: 'files'
+    };
+  }
+});
+// Create a new multer instance with the GridFsStorage engine
+const gfsUpload = multer({ storage: gfsStorage });
 // Create a new book
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', gfsupload.single('file'), async (req, res) => {
   try {
-    const { originalname, filename } = req.file;
-    const filePath = path.join(uploadPath, filename);
-    const pdfDoc = await PDFDocument.load(await fs.readFile(filePath));
-    const title = pdfDoc.getTitle();
-    const author = pdfDoc.getAuthor();
-    const data = await fs.readFile(filePath);
-    const book = new Book({ title, author, file: data });
+    const { originalname } = req.file;
+    const book = new Book({ title: originalname, file: req.file.id });
     await book.save();
-    await fs.unlink(filePath);
     return res.status(201).json({ message: 'Book uploaded successfully' });
   } catch (err) {
     console.error(err);
